@@ -61,3 +61,28 @@ func TestVerifyReadme(t *testing.T) {
 		assert.False(t, ok)
 	})
 }
+
+func TestCheckReadmes(t *testing.T) {
+	t.Run("all good", func(t *testing.T) {
+		ok, readmes, err := goreadme.CheckReadmes("testdata", "README.md", nil)
+		assert.NoError(t, err)
+		assert.True(t, ok)
+		assert.Empty(t, readmes)
+	})
+
+	t.Run("outdated", func(t *testing.T) {
+		ok, readmes, err := goreadme.CheckReadmes("testdata", "outdatedREADME.md", nil)
+		assert.NoError(t, err)
+		assert.False(t, ok)
+		assert.Equal(t, []string{"testdata/want/pkgs/pkg1/outdatedREADME.md"}, readmes)
+	})
+}
+
+func TestFindReadmes(t *testing.T) {
+	want := map[string]string{
+		"testdata/want/pkgs/pkg1/README.md": "github.com/WillAbides/godoc2md/goreadme/testdata/pkgs/pkg1",
+	}
+	got, err := goreadme.FindReadmes("testdata", "README.md", nil)
+	assert.NoError(t, err)
+	assert.Equal(t, want, got)
+}
