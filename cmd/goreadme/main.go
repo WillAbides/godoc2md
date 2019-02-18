@@ -7,16 +7,12 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 
-	"github.com/WillAbides/godoc2md"
+	"github.com/WillAbides/godoc2md/goreadme"
 )
 
 //go:generate ../../bin/goreadme github.com/WillAbides/godoc2md/cmd/goreadme
@@ -36,22 +32,9 @@ func main() {
 	}
 	pkgName := flag.Arg(0)
 
-	var buf bytes.Buffer
-	config := &godoc2md.Config{
-		TabWidth:          4,
-		DeclLinks:         true,
-		Goroot:            runtime.GOROOT(),
-		SrcLinkHashFormat: "#L%d",
-	}
-
-	godoc2md.Godoc2md([]string{pkgName}, &buf, config)
-	mdContent := buf.String()
-	mdContent = strings.Replace(mdContent, `/src/target/`, `./`, -1)
-	mdContent = strings.Replace(mdContent, fmt.Sprintf("/src/%s/", pkgName), `./`, -1)
-
-	err := ioutil.WriteFile(*out, []byte(mdContent), 0640)
+	err := goreadme.WriteReadme(pkgName, *out)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "failed writing to %s\n", *out)
+		_, _ = fmt.Fprintf(os.Stderr, "failed creating README.md for %s", pkgName)
 		os.Exit(1)
 	}
 }
