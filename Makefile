@@ -1,4 +1,4 @@
-all: lint examples gen
+all: examples gen lint test
 
 BINDIR := $(CURDIR)/bin
 
@@ -21,14 +21,24 @@ bin/godoc2md: $(shell find ./ -name \*.go)
 bin/goreadme: $(shell find ./ -name \*.go)
 	go build -o bin/goreadme ./cmd/goreadme/main.go
 
+bin/goreadme-lint: $(shell find ./ -name \*.go)
+	go build -o bin/goreadme-lint ./cmd/goreadme-lint/main.go
+
 gen: bin/goreadme
 	go generate ./...
+
+test:
+	go test -race ./...
+
+update-testdata:
+	go test -tags testdata ./...
 
 fmt: bin/goimports
 	bin/goimports -w .
 
-lint: bin/golangci-lint
+lint: bin/golangci-lint bin/goreadme-lint
 	bin/golangci-lint run ./...
+	bin/goreadme-lint .
 
 examples: bin/godoc2md
 	bin/godoc2md github.com/kr/fs > examples/fs/README.md

@@ -1,4 +1,5 @@
 
+this text makes this readme outdated
 
 # pkg1
 `import "github.com/WillAbides/godoc2md/goreadme/testdata/pkgs/pkg1"`
