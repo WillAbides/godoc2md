@@ -3,7 +3,7 @@
 //
 // Usage
 //
-//    goreadme [-out path/to/README.md] $PACKAGE
+//    goreadme [-check] [-out path/to/README.md] $PACKAGE
 package main
 
 import (
@@ -25,6 +25,7 @@ func usage() {
 
 func main() {
 	out := flag.String("out", filepath.FromSlash("./README.md"), "path to README.md")
+	check := flag.Bool("check", false, "check whether readme is up to date")
 	flag.Usage = usage
 	flag.Parse()
 	if flag.NArg() != 1 {
@@ -32,9 +33,21 @@ func main() {
 	}
 	pkgName := flag.Arg(0)
 
-	err := goreadme.WriteReadme(pkgName, *out)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "failed creating README.md for %s", pkgName)
-		os.Exit(1)
+	if *check {
+		ok, err := goreadme.VerifyReadme(pkgName, *out)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "error checking README.md for %s\n", pkgName)
+			os.Exit(1)
+		}
+		if !ok {
+			_, _ = fmt.Fprintf(os.Stderr, "%s is out of date\n", *out)
+			os.Exit(1)
+		}
+	} else {
+		err := goreadme.WriteReadme(pkgName, *out)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "failed creating README.md for %s\n", pkgName)
+			os.Exit(1)
+		}
 	}
 }
