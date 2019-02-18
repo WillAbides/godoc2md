@@ -3,20 +3,16 @@
 //
 // Usage
 //
-//    goreadme [-out path/to/README.md] $PACKAGE
+//    goreadme [-check] [-out path/to/README.md] $PACKAGE
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
-	"runtime"
-	"strings"
 
-	"github.com/WillAbides/godoc2md"
+	"github.com/WillAbides/godoc2md/goreadme"
 )
 
 //go:generate ../../bin/goreadme github.com/WillAbides/godoc2md/cmd/goreadme
@@ -29,6 +25,7 @@ func usage() {
 
 func main() {
 	out := flag.String("out", filepath.FromSlash("./README.md"), "path to README.md")
+	check := flag.Bool("check", false, "check whether readme is up to date")
 	flag.Usage = usage
 	flag.Parse()
 	if flag.NArg() != 1 {
@@ -36,22 +33,21 @@ func main() {
 	}
 	pkgName := flag.Arg(0)
 
-	var buf bytes.Buffer
-	config := &godoc2md.Config{
-		TabWidth:          4,
-		DeclLinks:         true,
-		Goroot:            runtime.GOROOT(),
-		SrcLinkHashFormat: "#L%d",
-	}
-
-	godoc2md.Godoc2md([]string{pkgName}, &buf, config)
-	mdContent := buf.String()
-	mdContent = strings.Replace(mdContent, `/src/target/`, `./`, -1)
-	mdContent = strings.Replace(mdContent, fmt.Sprintf("/src/%s/", pkgName), `./`, -1)
-
-	err := ioutil.WriteFile(*out, []byte(mdContent), 0640)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "failed writing to %s\n", *out)
-		os.Exit(1)
+	if *check {
+		ok, err := goreadme.VerifyReadme(pkgName, *out)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "error checking README.md for %s\n", pkgName)
+			os.Exit(1)
+		}
+		if !ok {
+			_, _ = fmt.Fprintf(os.Stderr, "%s is out of date\n", *out)
+			os.Exit(1)
+		}
+	} else {
+		err := goreadme.WriteReadme(pkgName, *out)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "failed creating README.md for %s\n", pkgName)
+			os.Exit(1)
+		}
 	}
 }
