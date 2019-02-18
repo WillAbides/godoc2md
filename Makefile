@@ -24,6 +24,12 @@ bin/goreadme: $(shell find ./ -name \*.go)
 gen: bin/goreadme
 	go generate ./...
 
+test:
+	go test -race ./...
+
+update-testdata:
+	go test -tags testdata ./...
+
 fmt: bin/goimports
 	bin/goimports -w .
 
