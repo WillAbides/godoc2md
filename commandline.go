@@ -47,9 +47,6 @@ func commandLine(w io.Writer, fs vfs.NameSpace, pres *godoc.Presentation, tmpl *
 		// the fake built-in package contains unexported identifiers
 		mode = godoc.NoFiltering | godoc.NoTypeAssoc
 	}
-	if pres.AllMode {
-		mode |= godoc.NoFiltering
-	}
 	if srcMode {
 		// only filter exports if we don't have explicit command-line filter arguments
 		if len(args) > 1 {
