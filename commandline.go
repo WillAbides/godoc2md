@@ -29,7 +29,7 @@ const (
 // Note that it may add a /target path to fs.
 func commandLine(w io.Writer, fs vfs.NameSpace, pres *godoc.Presentation, tmpl *template.Template, args []string) error {
 	path := args[0]
-	srcMode := pres.SrcMode
+	srcMode := false
 	cmdMode := strings.HasPrefix(path, cmdPrefix)
 	if strings.HasPrefix(path, srcPrefix) {
 		path = strings.TrimPrefix(path, srcPrefix)
