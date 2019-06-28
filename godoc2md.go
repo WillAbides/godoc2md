@@ -145,7 +145,6 @@ func Godoc2md(args []string, out io.Writer, config *Config) {
 	pres.ShowTimestamps = config.ShowTimestamps
 	pres.ShowPlayground = config.ShowPlayground
 	pres.DeclLinks = config.DeclLinks
-	pres.SrcMode = false
 	pres.URLForSrcPos = genSrcPosLinkFunc(config.SrcLinkFormat, config.SrcLinkHashFormat)
 	var tmpl *template.Template
 	if config.AltPkgTemplate != "" {
